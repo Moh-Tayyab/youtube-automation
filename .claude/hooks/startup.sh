@@ -17,6 +17,15 @@ source "$HOOK_SCRIPT_DIR/lib.sh"
 log_info "bootlogix hooks: startup sequence beginning"
 
 # ---------------------------------------------------------------------------
+# 0. Environment Health Check
+# ---------------------------------------------------------------------------
+if ! bootlogix_check_dependencies; then
+  log_error "Critical dependencies missing. Some hooks may fail."
+  # We don't exit 1 here because we don't want to block the entire Claude session,
+  # but we warn the user loudly.
+fi
+
+# ---------------------------------------------------------------------------
 # 1. Load credentials from secure storage
 # ---------------------------------------------------------------------------
 bootlogix_load_credentials

@@ -168,3 +168,5 @@ Create a `PRODUCTION_SUMMARY.md` in the project directory documenting:
   "qa_status": "passed"
 }
 """
+
+MAVEN_PRODUCER_AGENT_NAME = "maven-producer"

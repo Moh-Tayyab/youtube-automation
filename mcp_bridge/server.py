@@ -47,7 +47,15 @@ from mcp_bridge.manifest_tool import ManifestTool
 from production.bridges.social import SocialBridge
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
-...
+LOG_FORMAT = "%(asctime)s %(message)s"
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+logger = logging.getLogger("video-bridge")
+
+# ─── Constants ──────────────────────────────────────────────────────────────────
+WORKSPACE = os.environ.get("BOOTLOGIX_WORKSPACE", "/tmp/bootlogix_output")
+BRIDGE_FOLDER = os.path.join(WORKSPACE, "bridges")
+CREDENTIALS_DIR = os.path.join(Path(__file__).parent.parent, "production", "secrets")
+
 os.makedirs(WORKSPACE, exist_ok=True)
 os.makedirs(BRIDGE_FOLDER, exist_ok=True)
 

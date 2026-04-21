@@ -14,6 +14,48 @@ BOOTLOGIX_HOOKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BOOTLOGIX_PROJECT_DIR="$(cd "$BOOTLOGIX_HOOKS_DIR/../.." && pwd)"
 BOOTLOGIX_MEMORY_DIR="$BOOTLOGIX_PROJECT_DIR/memory"
 BOOTLOGIX_TEMP_DIR="/tmp/bootlogix"
+BOOTLOGIX_VIDEO_MANIFEST="$BOOTLOGIX_TEMP_DIR/video_manifest.txt"
+
+# ---------------------------------------------------------------------------
+# Security Configuration
+# ---------------------------------------------------------------------------
+# Maps command patterns to their risk level:
+# - 'block': Stop the operation immediately (exit 1)
+# - 'warn': Allow the operation but log a high-visibility warning
+# ---------------------------------------------------------------------------
+BOOTLOGIX_SECURITY_GATES=(
+  "block|git\s+push\s+.*--force|BLOCKED: git push --force would destroy remote history. Use --force-with-lease instead."
+  "block|rm\s+(-[rf]+\s+)?/\s|BLOCKED: rm -rf / detected — catastrophic operation."
+  "block|rm\s+(-[rf]+\s+)?/$|BLOCKED: rm -rf / detected — catastrophic operation."
+  "block|git\s+reset\s+--hard|BLOCKED: git reset --hard destroys uncommitted changes. Use git stash instead."
+  "block|git\s+clean\s+-[fd]+|BLOCKED: git clean removes untracked files permanently."
+  "block|git\s+add.*\.env|BLOCKED: staging .env file risks committing secrets."
+  "warn|git\s+checkout\s+-b\s+main|WARNING: Creating a branch named 'main' might conflict with the primary branch."
+  "warn|curl\s+.*-X\s+DELETE|WARNING: Destructive API call (DELETE) detected."
+)
+
+# ---------------------------------------------------------------------------
+# Dependency management
+# ---------------------------------------------------------------------------
+# Verifies that all required binaries are installed.
+# Returns 0 (ok), 1 (missing dependencies).
+bootlogix_check_dependencies() {
+  local deps=("jq" "inotifywait" "ffprobe" "curl")
+  local missing=()
+
+  for dep in "${deps[@]}"; do
+    if ! command -v "$dep" &>/dev/null; then
+      missing+=("$dep")
+    fi
+  done
+
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    log_error "Missing required dependencies: ${missing[*]}"
+    return 1
+  fi
+
+  return 0
+}
 
 # ---------------------------------------------------------------------------
 # Log levels
@@ -106,7 +148,11 @@ bootlogix_check_token_freshness() {
       expiry=$(grep -o '"expiry"[[:space:]]*:[[:space:]]*"[^"]*"' "$token_file" 2>/dev/null | head -1 | sed 's/.*"expiry"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
       if [[ -n "$expiry" ]]; then
         local expiry_epoch expiry_left
-        expiry_epoch=$(date -d "$expiry" +%s 2>/dev/null) || return 0
+        # Try GNU date first (Linux), fall back to BSD date (macOS)
+        expiry_epoch=$(date -d "$expiry" +%s 2>/dev/null) \
+          || expiry_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$expiry" +%s 2>/dev/null) \
+          || expiry_epoch=$(date -j -f "%Y-%m-%d %H:%M:%S" "$expiry" +%s 2>/dev/null) \
+          || continue
         expiry_left=$((expiry_epoch - $(date +%s)))
         if [[ $expiry_left -lt 0 ]]; then
           log_error "Token EXPIRED: $token_file (expired at $expiry)"
@@ -187,17 +233,40 @@ bootlogix_watch_folder() {
   log_info "Watching $watch_dir for new files..."
 
   # Wait for CLOSE_WRITE (file written and closed = ready to process)
-  inotifywait -m -e CLOSE_WRITE -e MOVED_TO \
-    --format '%w%f %e' "$watch_dir" 2>/dev/null \
-    | while read -r file event; do
-      # Only process video files
-      case "$file" in
-        *.mp4|*.mov|*.avi|*.mkv|*.webm|*.flv)
-          log_info "New video detected: $file (event: $event)"
-          bash "$callback_script" "$file" "$event" &
-          ;;
-      esac
-    done
+  # Use process substitution so 'file' and 'event' remain local to the while loop
+  # (piping to while read spawns a subshell where variables are global — process subst avoids this)
+  while read -r file event; do
+    # Only process video files
+    case "$file" in
+      *.mp4|*.mov|*.avi|*.mkv|*.webm|*.flv)
+        log_info "New video detected: $file (event: $event)"
+        bash "$callback_script" "$file" "$event" &
+        ;;
+    esac
+  done < <(inotifywait -m -e CLOSE_WRITE -e MOVED_TO \
+    --format '%w%f %e' "$watch_dir" 2>/dev/null)
+}
+
+# ---------------------------------------------------------------------------
+# Video Production Utilities
+# ---------------------------------------------------------------------------
+# Records a generated video file to the manifest for precise quality gating.
+bootlogix_record_video() {
+  local file="$1"
+  mkdir -p "$BOOTLOGIX_TEMP_DIR"
+  echo "$(date +%s)|$file" >> "$BOOTLOGIX_VIDEO_MANIFEST"
+}
+
+# Retrieves the most recent video generated.
+bootlogix_get_last_video() {
+  if [[ -f "$BOOTLOGIX_VIDEO_MANIFEST" ]]; then
+    tail -n 1 "$BOOTLOGIX_VIDEO_MANIFEST" | cut -d'|' -f2
+  fi
+}
+
+# Cleans up the video manifest.
+bootlogix_clear_video_manifest() {
+  rm -f "$BOOTLOGIX_VIDEO_MANIFEST"
 }
 
 # ---------------------------------------------------------------------------

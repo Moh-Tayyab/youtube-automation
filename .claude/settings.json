@@ -1,0 +1,55 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx skills:*)",
+      "Bash(python3:*)",
+      "Bash(sudo apt-get:*)",
+      "Skill(elevenlabs-tts)",
+      "Bash(npx remotion:*)",
+      "Skill(ai-video-generation)",
+      "Bash(pkill -f \"remotion\")",
+      "Bash(npm run:*)",
+      "Bash(ffprobe:*)",
+      "Bash(ffmpeg:*)",
+      "WebSearch",
+      "mcp__youtube-shorts-transcript-extractor__extract_youtube_shorts_transcript",
+      "Read(//home/muhammad_tayyab/.claude/skills/**)",
+      "Read(//tmp/bootlogix_output/**)",
+      "Read(//tmp/bootlogix_clips/**)",
+      "Read(//tmp/bootlogix_audio/**)",
+      "Skill(update-config)",
+      "Bash(infsh app *)",
+      "Bash(topaz-cli.exe --help)",
+      "Bash(topaz-cli --help)",
+      "Bash(playwright-cli --help)",
+      "Bash(npx agent-browser:*)",
+      "Bash(bash -n /home/muhammad_tayyab/bootlogix/.claude/hooks/*.sh)",
+      "Bash(pip install:*)",
+      "Bash(curl -s http://localhost:3000)"
+    ],
+    "deny": [
+      "Bash(node cli.js \"https://example.com\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  },
+  "mcpServers": {
+    "video-bridge": {
+      "command": "python3",
+      "args": ["/home/muhammad_tayyab/bootlogix/mcp_bridge/server.py"],
+      "env": {
+        "BOOTLOGIX_WORKSPACE": "/home/muhammad_tayyab/bootlogix/production/output"
+      }
+    },
+    "youtube-shorts-transcript-extractor": {
+      "command": "node",
+      "args": ["/home/muhammad_tayyab/bootlogix/.claude/skills/playwright-youtube-shorts/mcp-server/server.js"],
+      "cwd": "/home/muhammad_tayyab/bootlogix/.claude/skills/playwright-youtube-shorts",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  },
+  "enableAllProjectMcpServers": true
+}

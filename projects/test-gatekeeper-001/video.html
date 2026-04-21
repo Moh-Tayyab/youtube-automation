@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Agent Revolution</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --text: #f0f0f0;
+      --accent: #e0e0e0;
+      --dim: #888888;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #presentation {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease;
+    }
+
+    .scene.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scene-title {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 60px;
+      text-align: center;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .scene.active .scene-title {
+      animation: fadeSlideUp 0.8s ease forwards;
+    }
+
+    .lines {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 900px;
+      text-align: center;
+    }
+
+    .line {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--accent);
+      opacity: 0;
+    }
+
+    /* FADE animation */
+    .scene.fade .line {
+      transform: translateY(20px);
+    }
+    .scene.fade.active .line {
+      animation: fadeSlideUp 0.6s ease forwards;
+    }
+
+    /* SLIDE animation */
+    .scene.slide .line {
+      transform: translateX(-60px);
+    }
+    .scene.slide.active .line {
+      animation: slideInLeft 0.6s ease forwards;
+    }
+
+    /* ZOOM animation */
+    .scene.zoom .line {
+      transform: scale(0.85);
+    }
+    .scene.zoom.active .line {
+      animation: zoomIn 0.6s ease forwards;
+    }
+
+    /* Animation keyframes */
+    @keyframes fadeSlideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes zoomIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Staggered line delays */
+    .scene.active .line:nth-child(1) { animation-delay: 0.3s; }
+    .scene.active .line:nth-child(2) { animation-delay: 0.9s; }
+    .scene.active .line:nth-child(3) { animation-delay: 1.5s; }
+
+    /* Progress indicator */
+    .progress {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dim);
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+
+    .progress-dot.active {
+      background: var(--text);
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="presentation">
+  </div>
+  <div class="progress" id="progress"></div>
+
+  <script>
+    const scenes = [
+      {
+        "scene": 1,
+        "title": "The AI Agent Revolution Begins",
+        "lines": [
+          "72% of enterprises now use or test AI agents.",
+          "54% are actively deploying agents across core operations.",
+          "Q1 2025 saw only 11% actively using agents."
+        ],
+        "animation": "fade",
+        "duration": 3
+      },
+      {
+        "scene": 2,
+        "title": "A Trillion-Dollar Market Emerges",
+        "lines": [
+          "AI agent market hits $47.1B projected by 2030.",
+          "Global enterprise agentic infrastructure spending reached $12.4B in Q4 2025.",
+          "AI agents may mediate $5 trillion in global commerce by 2028."
+        ],
+        "animation": "slide",
+        "duration": 3
+      },
+      {
+        "scene": 3,
+        "title": "Tech Giants Dominate Infrastructure",
+        "lines": [
+          "Microsoft and AWS control 32% of enterprise AI agent infrastructure.",
+          "Microsoft has 345 million Microsoft 365 commercial seats for agent integration.",
+          "AWS operates 30+ global regions for large-scale autonomous deployment."
+        ],
+        "animation": "zoom",
+        "duration": 3
+      },
+      {
+        "scene": 4,
+        "title": "Healthcare's 900% ROI Revolution",
+        "lines": [
+          "Healthcare AI delivers 900% ROI on front desk automation.",
+          "Hospitals reduce administrative costs by 20-40% with AI agents.",
+          "68% of Fortune 500 companies now pilot multi-agent systems."
+        ],
+        "animation": "fade",
+        "duration": 4
+      },
+      {
+        "scene": 5,
+        "title": "Capabilities Doubling Every 7 Months",
+        "lines": [
+          "METR data shows AI agent capabilities doubling every 7 months.",
+          "AI currently handles tasks taking humans roughly 30 minutes.",
+          "By 2026, AI agents should handle tasks taking several months."
+        ],
+        "animation": "slide",
+        "duration": 3
+      },
+      {
+        "scene": 6,
+        "title": "The Autonomous Future Arrives",
+        "lines": [
+          "84% of organizations plan to increase agent investments in 2026.",
+          "Anthropic CEO predicts AI better than almost all humans by 2026-2027.",
+          "40% of Global 2000 roles involve direct AI agent engagement by 2028."
+        ],
+        "animation": "zoom",
+        "duration": 4
+      }
+    ];
+
+    const presentation = document.getElementById('presentation');
+    const progress = document.getElementById('progress');
+    let currentScene = 0;
+
+    // Build scenes
+    scenes.forEach((scene, index) => {
+      const sceneEl = document.createElement('div');
+      sceneEl.className = `scene ${scene.animation}`;
+      if (index === 0) sceneEl.classList.add('active');
+      sceneEl.innerHTML = `
+        <h1 class="scene-title">${scene.title}</h1>
+        <div class="lines">
+          ${scene.lines.map(line => `<p class="line">${line}</p>`).join('')}
+        </div>
+      `;
+      presentation.appendChild(sceneEl);
+
+      // Build progress dots
+      const dot = document.createElement('div');
+      dot.className = 'progress-dot' + (index === 0 ? ' active' : '');
+      progress.appendChild(dot);
+    });
+
+    // Animation sequence
+    function runPresentation() {
+      const sceneEls = document.querySelectorAll('.scene');
+      const dots = document.querySelectorAll('.progress-dot');
+
+      setInterval(() => {
+        const prev = currentScene;
+        currentScene = (currentScene + 1) % scenes.length;
+
+        sceneEls[prev].classList.remove('active');
+        sceneEls[currentScene].classList.add('active');
+
+        // Reset animations
+        const lines = sceneEls[currentScene].querySelectorAll('.line');
+        lines.forEach(line => {
+          line.style.animation = 'none';
+          line.offsetHeight; // Trigger reflow
+          line.style.animation = '';
+        });
+
+        dots[prev].classList.remove('active');
+        dots[currentScene].classList.add('active');
+      }, scenes[currentScene].duration * 1000 + 500);
+    }
+
+    runPresentation();
+  </script>
+</body>
+</html>

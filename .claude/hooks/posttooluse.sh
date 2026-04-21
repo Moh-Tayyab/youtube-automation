@@ -22,9 +22,9 @@ source "$HOOK_SCRIPT_DIR/lib.sh"
 parse_input() {
   local input
   input=$(cat)
-  EXIT_CODE=$(echo "$input" | grep -o '"exit_code":[0-9]*' | grep -o '[0-9]*' || echo "0")
-  TOOL_NAME=$(echo "$input" | grep -o '"tool_name":"[^"]*"' | sed 's/"tool_name":"//;s/"$//')
-  TOOL_ARGS=$(echo "$input" | grep -o '"tool_args":"[^"]*"' | sed 's/"tool_args":"//;s/"$//' || echo "")
+  EXIT_CODE=$(echo "$input" | jq -r '.exit_code // 0')
+  TOOL_NAME=$(echo "$input" | jq -r '.tool_name // empty')
+  TOOL_ARGS=$(echo "$input" | jq -r '.tool_args // empty')
 }
 
 # ---------------------------------------------------------------------------

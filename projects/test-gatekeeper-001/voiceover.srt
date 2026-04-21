@@ -1,0 +1,35 @@
+1
+00:00:00,000 --> 00:00:03,839
+The AI agent revolution is here.
+
+2
+00:00:04,940 --> 00:00:17,199
+72% of enterprises now use or test AI agents, up from just 11% last year.
+
+3
+00:00:17,199 --> 00:00:23,339
+The market hits $47 billion by 2030.
+
+4
+00:00:23,339 --> 00:00:31,019
+Microsoft and AWS control a third of the infrastructure.
+
+5
+00:00:32,119 --> 00:00:36,380
+Healthcare sees 900% ROI.
+
+6
+00:00:37,700 --> 00:00:41,799
+Capabilities double every seven months.
+
+7
+00:00:42,799 --> 00:00:50,299
+84% of organizations are increasing investments this year.
+
+8
+00:00:50,299 --> 00:00:54,659
+The autonomous future isn't coming.
+
+9
+00:00:55,560 --> 00:00:56,340
+It's now.

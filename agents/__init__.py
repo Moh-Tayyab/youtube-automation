@@ -1,8 +1,8 @@
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
+"""
+Agents package — re-exports SkillResult from the canonical location.
+The canonical SkillResult lives in mcp_bridge.agents (complete definition).
+All agent code imports from there.
+"""
+from mcp_bridge.agents import SkillResult
 
-@dataclass
-class SkillResult:
-    success: bool
-    artifact_path: Optional[str] = None
-    error: Optional[str] = None
+__all__ = ["SkillResult"]
