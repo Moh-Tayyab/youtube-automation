@@ -1,0 +1,57 @@
+name: Daily Triage
+
+on:
+  schedule:
+    - cron: '0 4 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install OpenCode
+        run: npm install -g @opencode-ai/cli
+
+      - name: Configure OpenCode credentials
+        run: |
+          mkdir -p ~/.local/share/opencode
+          cat > ~/.local/share/opencode/auth.json << 'EOF'
+          {
+            "zai-coding-plan": {
+              "type": "api",
+              "key": "${{ secrets.ZAI_API_KEY }}"
+            }
+          }
+          EOF
+
+      - name: Configure git
+        run: |
+          git config user.name "daily-triage[bot]"
+          git config user.email "daily-triage[bot]@users.noreply.github.com"
+
+      - name: Run daily triage
+        run: |
+          opencode run \
+            --auto \
+            -m zai-coding-plan/glm-5.2 \
+            --dir ${{ github.workspace }} \
+            "Run the daily-triage skill.
+Start by reading progress.md; finish by updating it.
+For each fix: draft it in an isolated worktree, have the reviewer subagent grade it, open a PR only on PASS, and append anything risky to the 'needs a human' section."
+        timeout-minutes: 30
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
