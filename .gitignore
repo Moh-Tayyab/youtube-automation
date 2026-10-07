@@ -9,3 +9,9 @@ production/secrets/
 
 # Output videos (large binary files)
 production/output/
+
+# Rendered videos/audio anywhere — regenerable via pipeline, never commit
+*.mp4
+*.aac
+output/
+my-video/*.mp4
